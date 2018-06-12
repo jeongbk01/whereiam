@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd">
+
+
+	<bean id="apiService" class="bk.api.gps.service.impl.EgovApiServiceImpl" />
+	<!-- api 오래된 데이터 정리 로직  -->
+	<bean id="apiServiceJob" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+		<property name="targetObject" ref="apiService" />
+		<property name="targetMethod" value="insertBackupData" />		
+	</bean>
+		
+	<!-- api 오래된 데이터 정리 트리거  -->	
+	<bean id="apiTrigger" class="org.springframework.scheduling.quartz.SimpleTriggerFactoryBean">
+		<property name="jobDetail" ref="apiServiceJob" />
+		<property name="startDelay" value="0" />
+		<property name="repeatInterval" value="86400000" />
+	</bean>
+		
+	<!-- 기관코드 수신 스케줄  -->	
+	<bean id="insttCodeReceiverScheduler"
+		class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+		<property name="triggers">
+			<list>
+				<ref bean="apiTrigger" />
+			</list>
+		</property>
+	</bean>
+</beans>

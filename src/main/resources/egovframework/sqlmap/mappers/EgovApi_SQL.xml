@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="bk.api.gps.service.impl.ApiMapper">
+	
+	<insert id="insertCallApi" parameterType="apiVO">
+		INSERT INTO GPS_INFO
+			(
+				SEQ
+				,UUID
+				,LAT
+				,LNG
+				,ACCURACY
+				,REG_DT
+			) VALUES(
+				(SELECT NVL(MAX(SEQ),0)+1 FROM GPS_INFO),
+				#{uuid},
+				#{lat},
+				#{lng},
+				${acc},
+				TO_CHAR(SYSDATE,'YYYYMMDDHH24MISS')
+			)
+	</insert>
+	
+	<insert id="insertBackupData" parameterType="string">
+		${value}
+	</insert>
+	
+	<delete id="deleteData">
+		DELETE FROM GPS_INFO 
+		WHERE TO_CHAR(TO_DATE(REG_DT,'YYYYMMDD HH24MISS'),'YYYYMMDD') BETWEEN TO_CHAR(SYSDATE-10,'YYYYMMDD') AND TO_CHAR(SYSDATE,'YYYYMMDD') 
+	</delete>
+	
+	<select id="selectApiList" parameterType="apiVO" resultType="egovMap">
+		SELECT 	F.SEQ,
+				F.UUID,
+				F.LAT,
+				F.LNG,
+				F.ACCURACY,
+				TO_CHAR(TO_DATE(F.REG_DT,'YYYY-MM-DD HH24:MI:SS'),'YYYY-MM-DD HH24:MI:SS')AS REG_DT
+		FROM    (
+		        SELECT  A.*, 
+		                ROWNUM AS R
+		        FROM    (
+		                SELECT	b.*
+		                FROM	GPS_INFO b
+		                WHERE	b.UUID = #{uuid}
+		                ORDER BY b.REG_DT DESC
+		                )A
+		        )F
+		WHERE   F.R BETWEEN ${firstIndex}+1 AND ${firstIndex}+${recordCountPerPage} 
+	</select>
+	
+	<select id="selectApiListTotCnt" parameterType="apiVO" resultType="Integer">
+        SELECT  count(*) as CNT
+        FROM    (
+                SELECT	b.*
+                FROM	GPS_INFO b
+                WHERE	b.UUID = #{uuid}
+                ORDER BY b.REG_DT DESC
+                )A
+	</select>
+</mapper>
