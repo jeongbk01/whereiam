@@ -172,7 +172,7 @@
                     </thead>
                     <tbody>                 
 
-                    <c:forEach var="result" items="${resultList}" varStatus="status">
+                    <c:forEach var="result" items="${resultList}" varStatus="status"> 
                     <!-- loop 시작 -->                                
 					  <tr>
 					    <td nowrap="nowrap" onclick="setInfo('${result.lat}','${result.lng}')"><strong><c:out value="${result.seq}"/></strong></td>		    
